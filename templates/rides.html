@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Available Rides - Ride Sharing{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Search Rides</h5>
+                <form action="{{ url_for('search_rides') }}" method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="source" placeholder="From" 
+                               value="{{ request.args.get('source', '') }}">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="destination" placeholder="To"
+                               value="{{ request.args.get('destination', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" name="date"
+                               value="{{ request.args.get('date', '') }}">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Available Rides</h5>
+                {% if rides %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Driver</th>
+                                    <th>Vehicle</th>
+                                    <th>Seats</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ride in rides %}
+                                <tr>
+                                    <td>{{ ride.ride_date }}</td>
+                                    <td>{{ ride.ride_time }}</td>
+                                    <td>{{ ride.source_location }}</td>
+                                    <td>{{ ride.destination_location }}</td>
+                                    <td>{{ ride.driver_email }}</td>
+                                    <td>{{ ride.vehicle_model }} ({{ ride.vehicle_no }})</td>
+                                    <td>{{ ride.seats_offered }}</td>
+                                    <td>
+                                        <button class="btn btn-primary join-btn" 
+                                                data-ride-id="{{ ride.ride_id }}"
+                                                data-source="{{ ride.source_location }}"
+                                                data-destination="{{ ride.destination_location }}"
+                                                data-date="{{ ride.ride_date }}"
+                                                data-time="{{ ride.ride_time }}">
+                                            Join Ride
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No rides found matching your search criteria.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Modal -->
+<div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestModalLabel">Join Ride Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to join this ride?</p>
+                <div class="ride-details">
+                    <p><strong>From:</strong> <span id="rideSource"></span></p>
+                    <p><strong>To:</strong> <span id="rideDestination"></span></p>
+                    <p><strong>Date:</strong> <span id="rideDate"></span></p>
+                    <p><strong>Time:</strong> <span id="rideTime"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmJoinBtn">Confirm Join</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRideId = null;
+
+// Handle join button click
+document.querySelectorAll('.join-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        currentRideId = this.dataset.rideId;
+        document.getElementById('rideSource').textContent = this.dataset.source;
+        document.getElementById('rideDestination').textContent = this.dataset.destination;
+        document.getElementById('rideDate').textContent = this.dataset.date;
+        document.getElementById('rideTime').textContent = this.dataset.time;
+        
+        const modal = new bootstrap.Modal(document.getElementById('requestModal'));
+        modal.show();
+    });
+});
+
+// Handle confirm join button
+document.getElementById('confirmJoinBtn').addEventListener('click', async function() {
+    if (!currentRideId) return;
+    
+    try {
+        const response = await fetch('/join_ride', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ride_id: currentRideId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('Join request sent successfully! The driver will review your request.');
+            window.location.reload();
+        } else {
+            alert(data.error || 'An error occurred while sending the request');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while processing your request');
+    }
+    
+    bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
+});
+</script>
+{% endblock %} 

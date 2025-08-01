@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Add Vehicle - Ride Sharing{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Add New Vehicle</h5>
+                <form method="POST" action="{{ url_for('add_vehicle') }}">
+                    <div class="mb-3">
+                        <label for="vehicle_no" class="form-label">Vehicle Number</label>
+                        <input type="text" class="form-control" id="vehicle_no" name="vehicle_no" required
+                               pattern="[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}"
+                               title="Please enter a valid vehicle number (e.g., MH12AB1234)">
+                        <div class="form-text">Format: XX00XX0000 (e.g., MH12AB1234)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="vehicle_model" class="form-label">Vehicle Model</label>
+                        <input type="text" class="form-control" id="vehicle_model" name="vehicle_model" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="seats_available" class="form-label">Number of Seats Available</label>
+                        <input type="number" class="form-control" id="seats_available" name="seats_available" 
+                               min="1" max="10" required>
+                        <div class="form-text">Maximum 10 seats allowed</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

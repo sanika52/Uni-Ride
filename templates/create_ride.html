@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Create Ride - Ride Sharing{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Create New Ride</h5>
+                <form method="POST" action="{{ url_for('create_ride') }}">
+                    <div class="mb-3">
+                        <label for="vehicle_id" class="form-label">Select Vehicle</label>
+                        <select class="form-select" id="vehicle_id" name="vehicle_id" required>
+                            <option value="">Choose your vehicle</option>
+                            {% for vehicle in vehicles %}
+                            <option value="{{ vehicle.vehicle_id }}">
+                                {{ vehicle.vehicle_model }} ({{ vehicle.vehicle_no }}) - {{ vehicle.seats_available }} seats
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="source" class="form-label">From</label>
+                            <input type="text" class="form-control" id="source" name="source" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="destination" class="form-label">To</label>
+                            <input type="text" class="form-control" id="destination" name="destination" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="ride_date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="ride_date" name="ride_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ride_time" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="ride_time" name="ride_time" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="seats_offered" class="form-label">Seats Available</label>
+                        <input type="number" class="form-control" id="seats_offered" name="seats_offered" min="1" required>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Create Ride</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('ride_date').min = today;
+        
+        // Set minimum time to current time if date is today
+        document.getElementById('ride_date').addEventListener('change', function() {
+            const selectedDate = this.value;
+            const timeInput = document.getElementById('ride_time');
+            
+            if (selectedDate === today) {
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timeInput.min = `${hours}:${minutes}`;
+            } else {
+                timeInput.min = '00:00';
+            }
+        });
+    });
+</script>
+{% endblock %} 

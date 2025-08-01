@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Ride Sharing{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">User Information</h5>
+                <div class="mb-3">
+                    <strong>Roll Number:</strong> {{ user.roll_number }}
+                </div>
+                <div class="mb-3">
+                    <strong>College:</strong> {{ user.college_name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong> {{ user.email }}
+                </div>
+                <div class="mb-3">
+                    <strong>Member Since:</strong> {{ user.created_at.strftime('%B %d, %Y') }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Your Vehicles</h5>
+                {% if vehicles %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle Number</th>
+                                    <th>Model</th>
+                                    <th>Seats</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vehicle in vehicles %}
+                                <tr>
+                                    <td>{{ vehicle.vehicle_no }}</td>
+                                    <td>{{ vehicle.vehicle_model }}</td>
+                                    <td>{{ vehicle.seats_available }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        You haven't added any vehicles yet.
+                        <a href="{{ url_for('add_vehicle') }}" class="alert-link">Add a vehicle</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Your Rides as Driver</h5>
+                {% if driver_rides %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Passengers</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ride in driver_rides %}
+                                <tr>
+                                    <td>{{ ride.ride_date }}</td>
+                                    <td>{{ ride.ride_time }}</td>
+                                    <td>{{ ride.source_location }}</td>
+                                    <td>{{ ride.destination_location }}</td>
+                                    <td>{{ ride.passengers }}</td>
+                                    <td>
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        You haven't created any rides yet.
+                        <a href="{{ url_for('create_ride') }}" class="alert-link">Create a ride</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Your Rides as Passenger</h5>
+                {% if passenger_rides %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Driver</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ride in passenger_rides %}
+                                <tr>
+                                    <td>{{ ride.ride_date }}</td>
+                                    <td>{{ ride.ride_time }}</td>
+                                    <td>{{ ride.source_location }}</td>
+                                    <td>{{ ride.destination_location }}</td>
+                                    <td>{{ ride.driver_email }}</td>
+                                    <td>
+                                        <span class="badge bg-success">Confirmed</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        You haven't joined any rides yet.
+                        <a href="{{ url_for('view_rides') }}" class="alert-link">Find available rides</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Driver Approval Modal -->
+<div class="modal fade" id="driverApprovalModal" tabindex="-1" aria-labelledby="driverApprovalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="driverApprovalModalLabel">New Ride Request!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> A passenger wants to join your ride
+                </div>
+                <div class="request-details">
+                    <p><strong>From:</strong> <span id="requestSource"></span></p>
+                    <p><strong>To:</strong> <span id="requestDestination"></span></p>
+                    <p><strong>Date:</strong> <span id="requestDate"></span></p>
+                    <p><strong>Time:</strong> <span id="requestTime"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="rejectRequestBtn">Reject</button>
+                <button type="button" class="btn btn-success" id="acceptRequestBtn">Accept</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRideId = null;
+let modalInstance = null;
+
+// Function to check for pending requests
+async function checkPendingRequests() {
+    try {
+        console.log('Checking for pending requests...');
+        const response = await fetch('/get_pending_requests');
+        const data = await response.json();
+        console.log('Pending requests response:', data);
+        
+        if (response.ok && data.requests && data.requests.length > 0) {
+            const request = data.requests[0]; // Get the first pending request
+            console.log('Found pending request:', request);
+            currentRideId = request.matched_ride_id;
+            
+            // Update modal content
+            document.getElementById('requestSource').textContent = request.rider_source;
+            document.getElementById('requestDestination').textContent = request.rider_destination;
+            document.getElementById('requestDate').textContent = request.preferred_date;
+            document.getElementById('requestTime').textContent = request.preferred_time;
+            
+            // Show the modal
+            if (!modalInstance) {
+                modalInstance = new bootstrap.Modal(document.getElementById('driverApprovalModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+            }
+            
+            // Force the modal to show
+            modalInstance.show();
+            
+            // Add a notification sound
+            const audio = new Audio('/static/notification.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+            
+            // Add a visual notification
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed top-0 end-0 p-3';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-primary text-white">
+                        <strong class="me-auto">New Ride Request!</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        A passenger wants to join your ride. Check the modal for details.
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Remove the notification after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    } catch (error) {
+        console.error('Error checking pending requests:', error);
+    }
+}
+
+// Check for pending requests more frequently (every 10 seconds)
+setInterval(checkPendingRequests, 10000);
+
+// Handle driver approval buttons
+document.getElementById('acceptRequestBtn').addEventListener('click', async function() {
+    await handleDriverResponse('accept');
+});
+
+document.getElementById('rejectRequestBtn').addEventListener('click', async function() {
+    await handleDriverResponse('reject');
+});
+
+async function handleDriverResponse(action) {
+    if (!currentRideId) return;
+    
+    try {
+        const response = await fetch('/handle_request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ride_id: currentRideId,
+                action: action
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.error || 'An error occurred');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while processing your request');
+    }
+    
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+}
+
+// Check for pending requests when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, checking for pending requests...');
+    checkPendingRequests();
+});
+</script>
+{% endblock %} 

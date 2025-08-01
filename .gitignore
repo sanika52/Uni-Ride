@@ -1,0 +1,9 @@
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Pip installer script
+get-pip.py
+

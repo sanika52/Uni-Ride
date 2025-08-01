@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - College Ride Sharing{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper animate-fade-in">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4 animate-slide-up">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('create_ride') }}" class="btn btn-primary animate-fade-in">
+                            <i class="bi bi-plus-circle"></i> Create New Ride
+                        </a>
+                        <a href="{{ url_for('add_vehicle') }}" class="btn btn-secondary animate-fade-in">
+                            <i class="bi bi-car-front"></i> Add Vehicle
+                        </a>
+                        <a href="{{ url_for('view_rides') }}" class="btn btn-info text-white animate-fade-in">
+                            <i class="bi bi-search"></i> Find Rides
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card animate-slide-up-delay">
+                <div class="card-body">
+                    <h5 class="card-title">Search Rides</h5>
+                    <form action="{{ url_for('search_rides') }}" method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control animate-fade-in" name="source" placeholder="From" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control animate-fade-in" name="destination" placeholder="To" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control animate-fade-in" name="date">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary animate-fade-in">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card animate-slide-up">
+                <div class="card-body">
+                    <h5 class="card-title">Your Upcoming Rides</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if rides %}
+                                    {% for ride in rides %}
+                                    <tr class="animate-slide-up-delay-{{ loop.index }}">
+                                        <td>{{ ride.ride_date }}</td>
+                                        <td>{{ ride.ride_time }}</td>
+                                        <td>{{ ride.source_location }}</td>
+                                        <td>{{ ride.destination_location }}</td>
+                                        <td>
+                                            {% if ride.driver_id == session.user_id %}
+                                                <span class="badge bg-primary">Driver</span>
+                                                <button class="badge bg-danger delete-ride animate-fade-in" 
+                                                        data-ride-id="{{ ride.ride_id }}"
+                                                        onclick="return confirm('Are you sure you want to delete this ride? This cannot be undone.')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Passenger</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">Active</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr class="animate-fade-in">
+                                        <td colspan="6" class="text-center">No upcoming rides found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <h2 class="animate-slide-down">Pending Ride Requests</h2>
+            {% if requests %}
+                <div class="list-group">
+                    {% for request in requests %}
+                        <div class="list-group-item animate-slide-up-delay-{{ loop.index }}">
+                            <h5 class="mb-1">Request from: {{ request.passenger_email }}</h5>
+                            <p class="mb-1">Ride: {{ request.source_location }} to {{ request.destination_location }}</p>
+                            <p class="mb-1">Date: {{ request.ride_date }} | Time: {{ request.ride_time }}</p>
+                            <p class="mb-1">Vehicle: {{ request.vehicle_model }} ({{ request.vehicle_no }})</p>
+                            <div class="mt-2">
+                                <button class="btn btn-success btn-sm accept-request animate-fade-in" 
+                                        data-request-id="{{ request.request_id }}"
+                                        data-ride-id="{{ request.matched_ride_id }}">
+                                    Accept
+                                </button>
+                                <button class="btn btn-danger btn-sm reject-request animate-fade-in"
+                                        data-request-id="{{ request.request_id }}"
+                                        data-ride-id="{{ request.matched_ride_id }}">
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="animate-fade-in">No pending ride requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-wrapper {
+    padding: 20px;
+    min-height: 100vh;
+    background: #F8F8F8;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(50, 78, 123, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(50, 78, 123, 0.15);
+}
+
+.card-title {
+    color: #324E7B;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    color: #5068A9;
+    font-weight: 600;
+    border-bottom: 2px solid #86A6DF;
+}
+
+.table td {
+    vertical-align: middle;
+    color: #324E7B;
+}
+
+.list-group-item {
+    border: 1px solid #86A6DF;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.list-group-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(50, 78, 123, 0.1);
+}
+
+.btn {
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #324E7B;
+    border-color: #324E7B;
+}
+
+.btn-primary:hover {
+    background-color: #5068A9;
+    border-color: #5068A9;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background-color: #324E7B;
+    border-color: #324E7B;
+}
+
+.btn-success:hover {
+    background-color: #5068A9;
+    border-color: #5068A9;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    transform: translateY(-2px);
+}
+
+.badge {
+    padding: 6px 12px;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.form-control {
+    border: 1px solid #86A6DF;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #5068A9;
+    box-shadow: 0 0 0 2px rgba(80, 104, 169, 0.2);
+}
+
+/* Animation styles */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-down {
+    animation: slideDown 0.6s ease-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+}
+
+.animate-slide-up-delay {
+    animation: slideUp 0.6s ease-out 0.2s both;
+}
+
+.animate-slide-up-delay-1 {
+    animation: slideUp 0.6s ease-out 0.3s both;
+}
+
+.animate-slide-up-delay-2 {
+    animation: slideUp 0.6s ease-out 0.4s both;
+}
+
+.animate-slide-up-delay-3 {
+    animation: slideUp 0.6s ease-out 0.5s both;
+}
+
+.animate-slide-up-delay-4 {
+    animation: slideUp 0.6s ease-out 0.6s both;
+}
+
+/* Hover animations */
+.table tr:hover {
+    background-color: rgba(134, 166, 223, 0.1);
+    transform: scale(1.01);
+    transition: all 0.3s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle accept/reject buttons
+    document.querySelectorAll('.accept-request, .reject-request').forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            const rideId = this.dataset.rideId;
+            const action = this.classList.contains('accept-request') ? 'accept' : 'reject';
+            
+            // Add loading state to buttons
+            const buttons = this.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            });
+            
+            fetch('/handle_request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    request_id: requestId,
+                    ride_id: rideId,
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    // Reset buttons
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.classList.contains('accept-request') ? 'Accept' : 'Reject';
+                    });
+                } else {
+                    // Add success animation before reload
+                    const listItem = this.closest('.list-group-item');
+                    listItem.style.transition = 'all 0.5s ease';
+                    listItem.style.opacity = '0';
+                    listItem.style.transform = 'translateX(100px)';
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request');
+                // Reset buttons
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.innerHTML = btn.classList.contains('accept-request') ? 'Accept' : 'Reject';
+                });
+            });
+        });
+    });
+
+    // Handle delete ride buttons
+    document.querySelectorAll('.delete-ride').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const rideId = this.dataset.rideId;
+            
+            // Add loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
+            
+            fetch('/delete_ride/' + rideId, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    // Reset button
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-trash"></i> Delete';
+                } else {
+                    // Add success animation before reload
+                    const row = this.closest('tr');
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(100px)';
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the ride');
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-trash"></i> Delete';
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 

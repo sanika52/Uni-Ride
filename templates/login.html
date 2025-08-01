@@ -1,0 +1,244 @@
+{% extends "auth_base.html" %}
+
+{% block title %}Login - College Ride Sharing{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-container animate-fade-in">
+        <div class="auth-header">
+            <h2 class="animate-slide-down">Welcome Back!</h2>
+            <p class="auth-subtitle animate-slide-down-delay">Sign in to continue to College Ride Sharing</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} animate-slide-in">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+            <div class="form-group animate-slide-up">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group animate-slide-up-delay">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block animate-slide-up-delay-2">Sign In</button>
+        </form>
+        
+        <div class="auth-footer animate-fade-in-delay">
+            <p>Don't have an account? <a href="{{ url_for('register') }}" class="auth-link">Create an account</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F8F8F8;
+    padding: 20px;
+}
+
+.auth-container {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(50, 78, 123, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h2 {
+    color: #324E7B;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.auth-subtitle {
+    color: #5068A9;
+    font-size: 16px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #324E7B;
+    font-weight: 500;
+}
+
+.auth-form .form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #86A6DF;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+}
+
+.auth-form .form-control:focus {
+    border-color: #5068A9;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(80, 104, 169, 0.2);
+    background-color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.btn-block {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 10px;
+    background-color: #324E7B;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-block:hover {
+    background-color: #5068A9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(50, 78, 123, 0.2);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #5068A9;
+}
+
+.auth-link {
+    color: #324E7B;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+    color: #5068A9;
+}
+
+.alert {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alert-error {
+    background-color: #fff5f5;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background-color: #F8F8F8;
+    color: #324E7B;
+    border: 1px solid #86A6DF;
+}
+
+/* Animation styles */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-fade-in-delay {
+    animation: fadeIn 0.6s ease-out 0.6s both;
+}
+
+.animate-slide-down {
+    animation: slideDown 0.6s ease-out;
+}
+
+.animate-slide-down-delay {
+    animation: slideDown 0.6s ease-out 0.2s both;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+}
+
+.animate-slide-up-delay {
+    animation: slideUp 0.6s ease-out 0.2s both;
+}
+
+.animate-slide-up-delay-2 {
+    animation: slideUp 0.6s ease-out 0.4s both;
+}
+
+.animate-slide-in {
+    animation: slideIn 0.6s ease-out;
+}
+
+/* Hover animations */
+.form-control:hover {
+    border-color: #5068A9;
+    transform: translateY(-1px);
+}
+
+.btn-block:active {
+    transform: translateY(1px);
+}
+</style>
+{% endblock %} 
