@@ -96,16 +96,16 @@ college-ride-sharing/
 ![Registration Page](screenshots/Register.png)
 
 ### Dashboard Page
-![Dashboard](screenshots/DasBoard.png)
+![Dashboard](screenshots/Dashboard.png)
 
 ### Request Page
-![Request](screenshots/Reqest_.png)
+![Request](screenshots/Request1.png)
 
 ###  Request Page
-![Request](screenshots/Request.png)
+![Request](screenshots/Request2.png)
 
 ###  Dashboard Page
-![Dashboard](screenshots/pending_request.png)
+![Dashboard](screenshots/Pending_Request.png)
 
 
 ## Security Features
